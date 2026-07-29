@@ -63,7 +63,11 @@ Phase 5  Convert .tex -> manuscript.docx
 Phase 6  Package: figures at print DPI · submission checklist ·
    |     data-deposit reminder · completeness report
    |
-Phase 7  ==== CLEANUP GATE ====  only after you approve the manuscript:
+Phase 7  Verify the finished .docx: ORE compliance read back off the Word
+   |     file · visual check against the template
+   |     ==== APPROVAL GATE ====  you review manuscript.docx and confirm
+   |
+Phase 8  ==== CLEANUP ====  only after you approve the manuscript:
          delete the working copy and templates, keep the deliverables
 ```
 
@@ -216,6 +220,14 @@ funder list, the preprint citation — is not quietly skipped. It lands in
 `SUBMISSION-CHECKLIST.md` marked **needs your input**, so the package always
 tells you exactly what is outstanding.
 
+And the compliance is **checked against the deliverable, not just applied to the
+input**. Phase 7 runs `verify_manuscript.py`, which reads `word/document.xml`
+back out of the finished `.docx` and re-asserts ORE section order, the mandatory
+declarations, the structured abstract, reference-list placement, figure and
+table legend numbering, and that the ORE styling was really applied. It exits
+non-zero on any failure, so a non-compliant package stops the pipeline instead
+of reaching the submission form.
+
 If ORE updates its guidelines, edit `references/ore-guidelines.md`: it is the
 single place the rules live, and the pipeline follows it.
 
@@ -265,6 +277,7 @@ scripts/figures.pl                    strips images, relocates figure legends
 scripts/tables.pl                     moves tables after the references
 scripts/postprocess.py                OOXML fixups on the finished .docx
 scripts/verify_styles.py              orphan-style guard
+scripts/verify_manuscript.py          reads ORE compliance back off the .docx
 scripts/convert_figure.py             figure → 300/600 dpi TIFF/JPEG
 ```
 

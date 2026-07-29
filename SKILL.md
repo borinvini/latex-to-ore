@@ -26,7 +26,8 @@ Phase 3  Inject answers INTO ore-submission/tex/main.tex:
 Phase 4  Author reviews / edits ore-submission/tex/main.tex   (review gate)
 Phase 5  Convert the edited .tex -> manuscript.docx (enriched ref + verify styles)
 Phase 6  Figures, checklist, data-deposit reminder, summary
-Phase 7  After the author APPROVES the manuscript: delete the working tex copy
+Phase 7  Verify the FINISHED .docx against ORE + the template   (approval gate)
+Phase 8  After the author APPROVES the manuscript: delete the working tex copy
          and the templates; keep manuscript, figures, checklist
 ```
 
@@ -455,8 +456,8 @@ added later by `postprocess.py`, not here.
      sources). On a missing-dependency exit (2), fall back to keep-as-is for that
      figure and tell the author what to install (`pip install Pillow`; poppler).
 4. **Tables** — already relocated to a "Tables" section after the references by
-   Phase 3 / conversion. Confirm every table has a legend and the ordering
-   (References -> Figure Legends -> Tables) is correct in the `.docx`.
+   Phase 3 / conversion. Legends and the References -> Figure Legends -> Tables
+   ordering are verified mechanically in Phase 7; do not hand-wave them here.
 5. Copy `references/ore-checklist-template.md` to
    `ore-submission/SUBMISSION-CHECKLIST.md`, filling `{{PAPER_TITLE}}` and
    `{{DATE}}`, marking each item done / needs-input / N/A based on what the run
@@ -465,26 +466,67 @@ added later by `postprocess.py`, not here.
    an approved repository (Zenodo/figshare, CC BY/CC0) and its DOI added to the
    Data Availability statement. Point to `references/data-package-structure.md`;
    offer to scaffold an empty deposit folder.
-7. **Optional visual style check** — the automated `verify_styles.py` catches
-   orphan styles (name-level fidelity) but cannot see spacing/colour drift. If
-   the author wants extra assurance, or if anything looked off, offer a visual
-   pass: render/inspect `manuscript.docx` and compare headings, body font,
-   spacing, and table appearance against the ORE template. This is optional and
-   not run automatically (it is slower/heavier than the script).
-8. Print a summary: package contents and remaining author to-dos — the
+7. Print a summary: package contents and remaining author to-dos — the
    equation-review flag (cases/matrix math may show as raw TeX), any figures
    flagged for re-export, the preprint self-citation to add later, the funder
    cross-check, the data-deposit DOI, and any Phase 2 items left as "needs your
    input".
 
-## Phase 7 — Cleanup (only after the author approves the manuscript)
+## Phase 7 — Verify the manuscript & get approval
+
+Everything up to here checked the *inputs*: Phase 4 reviewed the `.tex` before
+conversion, and `verify_styles.py` checked style NAMES. This phase checks the
+**deliverable itself** — what actually landed in `manuscript.docx` — and is the
+gate that Phase 8's deletion depends on. Do not skip it.
+
+1. **Run the compliance verifier** on the finished package:
+
+   ```sh
+   python "$SKILLDIR/scripts/verify_manuscript.py" \
+     ore-submission/manuscript.docx ore-submission/figures
+   ```
+
+   It reads `word/document.xml` and checks: ORE section order, the four
+   mandatory declarations, the structured abstract (labels, <=300 words, no
+   citations), that the reference list exists and sits BEFORE the figure legends,
+   that every figure legend and table legend is numbered, that no raw LaTeX
+   leaked, that no images are embedded, and that the enriched reference doc was
+   really applied. It exits non-zero on any compliance failure.
+
+   The order check matters most: if `preprocess.pl`'s `\hypertarget{refs}{}`
+   anchor fails to take, citeproc appends the references at the very END —
+   after the Figure Legends and Tables — which breaks ORE order invisibly. A
+   `.tex` review cannot catch this; only reading the DOCX can.
+
+2. **On FAIL, fix and reconvert — do not ship it.** Each failure names its
+   cause: a missing declaration goes back to Phase 3, leaked LaTeX needs a new
+   rule in `preprocess.pl`, missing numbering means `postprocess.py` did not
+   run, and a missing ORE blue means the conversion did not use the enriched
+   reference. Re-run Phase 5, then verify again. Report WARNs to the author
+   rather than acting on them alone (subfigures legitimately inflate the legend
+   count).
+
+3. **Visual check against the ORE template** — the scripts verify structure and
+   style *names*; they cannot see spacing or colour drift. Render/inspect
+   `manuscript.docx` and compare against `ore-submission/ore-template.docx`:
+   heading colour and hierarchy, body font and size, the abstract and keywords
+   blocks, table borders, and the equation numbering alignment. Report what you
+   compared and anything that looked off.
+
+4. **Present the manuscript for approval and PAUSE.** Show the verifier output,
+   the visual findings, and the outstanding checklist items, then ask the author
+   to review `ore-submission/manuscript.docx` and confirm it is final. Phase 8
+   deletes the LaTeX working copy, so do not proceed on anything less than an
+   explicit approval.
+
+## Phase 8 — Cleanup (only after the author approves the manuscript)
 
 Once the author has reviewed `ore-submission/manuscript.docx` and **explicitly
 says it is approved/final**, remove the intermediate build material so the
 package contains only what is submitted.
 
 **Ask first, then delete.** Do not run this on your own initiative, and never as
-part of Phase 6 — if the author has not said the manuscript is approved, stop and
+part of Phase 7 — if the author has not said the manuscript is approved, stop and
 ask. If they want to keep the LaTeX copy, skip this phase entirely.
 
 Delete:
