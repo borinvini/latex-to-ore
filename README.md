@@ -84,13 +84,13 @@ The skill reads its own bundled scripts from a fixed path, so **the directory
 name must be `latex-to-ore`**.
 
 ```sh
-git clone https://github.com/<you>/latex-to-ore.git ~/.claude/skills/latex-to-ore
+git clone https://github.com/borinvini/latex-to-ore.git ~/.claude/skills/latex-to-ore
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/<you>/latex-to-ore.git "$env:USERPROFILE\.claude\skills\latex-to-ore"
+git clone https://github.com/borinvini/latex-to-ore.git "$env:USERPROFILE\.claude\skills\latex-to-ore"
 ```
 
 Restart Claude Code (or start a new session) and the skill is available.
