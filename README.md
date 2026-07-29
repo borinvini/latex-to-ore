@@ -11,8 +11,7 @@ a long list of house rules: a structured abstract, mandatory declaration
 sections in a fixed order, tables moved after the references, figures as
 separate print-quality files, a specific author/affiliation layout, and a strict
 open-data policy. Getting a LaTeX manuscript through that gauntlet by hand is
-tedious and easy to get wrong — most ORE desk rejections are formatting and
-declaration problems, not science problems.
+tedious and easy to get wrong.
 
 Naively running `pandoc paper.tex -o paper.docx` does not work. The output loses
 equation numbers, drops captions on `table*` floats, silently deletes tables
@@ -21,7 +20,10 @@ reference list in the wrong place, and — because Pandoc only applies a style
 that already exists in the reference document — renders almost everything in
 Calibri black instead of the ORE house style.
 
-This skill encodes the fixes for all of that as a repeatable pipeline.
+This skill encodes the fixes for all of that as a repeatable pipeline, and it
+covers **every rule in the ORE Research Article guidelines** — see
+[ORE compliance coverage](#ore-compliance-coverage) for the requirement-by-requirement
+mapping.
 
 ## The approach: LaTeX-first
 
@@ -173,24 +175,55 @@ Each phase leaves its state on disk, so you can stop after the review gate and
 come back later — point a new session at the same paper directory and ask it to
 continue from `ore-submission/`.
 
-## What it handles for you
+## ORE compliance coverage
 
-**Compliance**
-- Structured abstract (Background / Methods / Results / Conclusions, ≤300 words,
-  no citations, abbreviations expanded)
-- The five declaration sections in ORE's required order: Data Availability →
-  Ethics and consent → Competing Interests → Grant Information →
-  Acknowledgments
-- Author block rewritten to ORE's layout — affiliations, all author emails and
-  the corresponding author as plain lines after the names, with superscripts
-  validated against the affiliation count (a common rejection cause), and
-  `\thanks{}` footnotes removed
-- Open-data policy check, including flagging non-approved repositories
-- Cross-check that every figure is both cited and provided
-- CRediT author contributions collected (they go in ORE's web form, not the
-  manuscript)
+**The skill implements the ORE Research Article guidelines in full.** The rules
+are not scattered through the code — they are written down as a single
+authoritative reference, [`references/ore-guidelines.md`](references/ore-guidelines.md),
+which the skill loads at Phase 2 and works through item by item. That file is
+transcribed from the public *Preparing a Research Article* guidelines **plus** the
+requirements from a real ORE editorial pre-publication check, which in a few
+places go beyond what the public page states.
 
-**Conversion fidelity**
+Every requirement in that reference is covered by the pipeline. Nothing is left
+to the model's memory of what ORE wants:
+
+| ORE requirement | How the skill satisfies it |
+|---|---|
+| **Section order** — authors → title → abstract → keywords → PLS → body → declarations → references → figure legends → tables | Enforced structurally: Phase 3 injects the declarations before `\bibliography`, `tables.pl` moves tables after the references, and `figures.pl` places the legends between them |
+| **Structured abstract** — Background / Methods / Results / Conclusions, ≤300 words, no citations, abbreviations expanded | Drafted for your approval in Phase 2, written into the `.tex` in Phase 3 |
+| **Keywords** — up to 8 | Pulled from `\IEEEkeywords` (or equivalent), trimmed to 8, given a proper ORE-styled heading |
+| **Plain Language Summary** — recommended | Offered and drafted on request; placed after the keywords |
+| **Main body** — standard IMRaD, ≤15,000 words | Section mapping confirmed with you; never silently renamed |
+| **Preprint self-citation** | Recorded as an explicit to-do on the checklist (the DOI does not exist until after submission) |
+| **Data Availability** — mandatory even with no data | Written in ORE's exact required format: *Underlying data* + *Extended data* subsections, per-file descriptions, DOI, closing CC BY 4.0 / CC0 licence sentence |
+| **Open Data policy** — values behind means/SDs and every figure, points extracted from images, data dictionary; DOI required; no embargo, no login wall | Walked through in Phase 2; non-approved repositories (e.g. Kaggle) are flagged with a Zenodo/figshare/Dryad/OSF recommendation |
+| **Ethics and consent** — dedicated section immediately after Data Availability | Board name, approval number and consent type collected; otherwise the exact required "Ethical approval and consent were not required." |
+| **Competing Interests** — mandatory | Defaults to "No competing interests were disclosed" unless you say otherwise |
+| **Grant Information** — every funder, project ID + title + grantee | Extracted from `\thanks{}`/acknowledgments, then cross-checked with you against the funders you declare in the submission form (the editorial office flags mismatches) |
+| **Author Contributions** — CRediT | Collected, and you are told explicitly it goes in the web form, *not* the manuscript |
+| **Acknowledgments** — optional, no funding | Kept optional; funding is routed to Grant Information only |
+| **Supplementary material** — not accepted | Never produced; extended data is directed to the repository deposit instead |
+| **Authors block** — affiliations listed, superscripts matching the affiliation count, corresponding author after the affiliations | Author block rewritten to ORE's layout with every author's email; superscript count validated against the affiliation count (a common rejection); `\thanks{}` footnotes removed |
+| **References** — consistent style, datasets in the reference list | IEEE numbered style via the bundled CSL and citeproc |
+| **Figures** — separate files, TIFF/JPEG, 300 dpi colour / 600 dpi greyscale, removed from the body, legends collected at the end, every figure both cited and supplied | Images stripped from the manuscript, legends collected and numbered, files exported at the right DPI in citation order, and a cited-vs-supplied cross-check run in both directions |
+| **Tables** — native Word tables with legends, after the references | Relocated by `tables.pl`, converted as real Word tables, captions moved below and numbered |
+| **Data repository deposit** — the second half of the submission | Reminded, with a recommended deposit layout in [`references/data-package-structure.md`](references/data-package-structure.md); the folder can be scaffolded for you |
+| **Eligibility** — EU-funded project | Surfaced on the checklist; this one is yours to confirm |
+
+Anything that cannot be settled automatically — a missing data DOI, an unclear
+funder list, the preprint citation — is not quietly skipped. It lands in
+`SUBMISSION-CHECKLIST.md` marked **needs your input**, so the package always
+tells you exactly what is outstanding.
+
+If ORE updates its guidelines, edit `references/ore-guidelines.md`: it is the
+single place the rules live, and the pipeline follows it.
+
+## Conversion fidelity
+
+Beyond the content rules, the skill fixes what Pandoc gets wrong on the way to
+Word:
+
 - An *enriched* reference document that defines every style Pandoc emits, so the
   output actually inherits the ORE look instead of Pandoc's Calibri defaults
 - Equation numbers restored (Pandoc drops them) as right-aligned `(N)`
@@ -204,12 +237,10 @@ continue from `ore-submission/`.
 - A style-verification guard that fails the build if any style in the output is
   undefined in the reference document
 
-**Packaging**
-- Figures rasterized to ORE print quality — 300 dpi colour / 600 dpi greyscale,
-  auto-detected — and renamed in citation order
-- A filled-in submission checklist with per-item status
-
 ## Known limitations
+
+These are cosmetic conversion artefacts, not compliance gaps — each one is
+flagged for your review rather than silently shipped:
 
 - **Subfigures:** Pandoc counts each `\label` as a separate figure, so a
   two-panel figure produces more numbered legends than there are panels. Body
