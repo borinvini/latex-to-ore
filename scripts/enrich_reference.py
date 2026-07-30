@@ -91,11 +91,20 @@ FALLBACK_BASE = {"paragraph": "Normal", "table": "TableNormal"}
 # this patch colours it ORE blue (004494) so the "Abstract" heading — and the
 # "Keywords" heading that postprocess.py retypes to AbstractTitle — match the
 # blue section headings, per ORE house style.
+#
+# BodyText gets a real space-after (120 twips = 6 pt) so consecutive body
+# paragraphs are visibly separated — the stock template's BodyText has only
+# before="14" (0.7 pt), which reads as no gap at all. FirstParagraph, Abstract,
+# Bibliography, captions, etc. inherit this via `basedOn BodyText`. Compact
+# (Pandoc's tight-list and table-cell paragraph style) is pinned back to 0/0 so
+# list items and table cells stay tight instead of inheriting the 6 pt gap.
 STYLE_PATCHES = {
     "Title":         {"spacing": ("240", "160"), "jc": "center", "color": "004494", "drop_ind": True},
     "Heading1":      {"spacing": ("240", "120"), "jc": None,     "color": None,     "drop_ind": False},
     "Heading2":      {"spacing": ("200", "80"),  "jc": None,     "color": None,     "drop_ind": False},
     "AbstractTitle": {"spacing": ("200", "80"),  "jc": None,     "color": "004494", "drop_ind": False},
+    "BodyText":      {"spacing": ("0", "120"),   "jc": None,     "color": None,     "drop_ind": False},
+    "Compact":       {"spacing": ("0", "0"),     "jc": None,     "color": None,     "drop_ind": False},
 }
 
 # The ORE body font size, in half-points (19 = 9.5 pt), matching the template's

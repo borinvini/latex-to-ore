@@ -105,10 +105,18 @@ compliant. Gather (do not write into the `.tex` yet — that is Phase 3):
    reflecting the manuscript. Draft it for the author to approve.
 3. **Keywords** — up to 8; pull from `\IEEEkeywords` (or equivalent) if present.
 4. **Plain Language Summary** — offer to draft one (recommended, not required).
-5. **Section mapping** — confirm the body maps to Introduction / Methods /
+5. **Drafting style rule (abstract + Plain Language Summary): NEVER use en
+   dashes or em dashes** (`–` / `—`, or LaTeX `--` / `---`) in any prose this
+   skill drafts. No parenthetical dashes ("severe weather – snow and ice – is"),
+   no dash-joined ranges ("2018–2024"). Rephrase instead: use commas or
+   "such as ..." for asides, parentheses where natural, and "2018 to 2024" /
+   "between 2018 and 2024" for ranges. Hyphens inside compound words
+   (ready-to-use) are fine. When reviewing an existing abstract/PLS, rewrite
+   any dash constructions the same way.
+6. **Section mapping** — confirm the body maps to Introduction / Methods /
    Results / Conclusions-Discussion. Don't silently rename the author's
    sections — ask before restructuring.
-6. **Preprint self-citation** — ORE publishes the article as a preprint before
+7. **Preprint self-citation** — ORE publishes the article as a preprint before
    review and asks authors to cite their own preprint. Record as a to-do (add
    the preprint DOI once known; usually not possible until after submission).
 
@@ -116,7 +124,7 @@ Declarations to gather (Phase 3 writes them at the END, before `\bibliography`,
 in this order: Data Availability -> Ethics and consent -> Competing Interests ->
 Grant Information -> Acknowledgments):
 
-7. **Data Availability** — MANDATORY even with no new data. Follow the ORE Open
+8. **Data Availability** — MANDATORY even with no new data. Follow the ORE Open
    Data policy and exact format in `references/ore-guidelines.md`: an
    **Underlying data** subsection ("Repository name: [title]. https://doi.org/XXXX
    [Reference]." + a bulleted list of every deposited file with a description),
@@ -128,21 +136,21 @@ Grant Information -> Acknowledgments):
    (e.g. Kaggle) — ORE expects an approved repository (Zenodo/figshare/Dryad/OSF)
    with CC BY/CC0 and no login wall; recommend a Zenodo/figshare deposit and use
    that DOI. (See `data-package-structure.md` for the matching deposit.)
-8. **Ethics and consent** — dedicated section immediately AFTER Data
+9. **Ethics and consent** — dedicated section immediately AFTER Data
    Availability. Human/animal subjects: give ethics-board name, approval number,
    consent type. If not applicable: "Ethical approval and consent were not
    required."
-9. **Competing Interests** — mandatory. Default "No competing interests were
+10. **Competing Interests** — mandatory. Default "No competing interests were
    disclosed" unless the author says otherwise (accepted variant: "Conflict of
    interest").
-10. **Grant Information** — extract from `\thanks{...}`/acknowledgments; format
+11. **Grant Information** — extract from `\thanks{...}`/acknowledgments; format
     as project ID + title + grantee for EVERY funder. Cross-check against the
     funders the author declares in the submission-system funding form (the
     editorial office flags any funder in the system but missing here). Ask the
     author to confirm the full funder list.
-11. **Author Contributions** — collect a CRediT-taxonomy summary, but note it is
+12. **Author Contributions** — collect a CRediT-taxonomy summary, but note it is
     entered in the ORE web form, NOT written into the manuscript.
-12. **Acknowledgments** — optional; no grant funding here (that belongs only in
+13. **Acknowledgments** — optional; no grant funding here (that belongs only in
     Grant Information).
 
 ## Phase 3 — Inject content into the LaTeX copy
@@ -317,10 +325,14 @@ few properties on styles the template already defines (or that the enrichment
 pass just added): the `Title` is made centered + ORE blue (`004494`, matching the
 section headings) with breathing room; `Heading1`/`Heading2` get real `spacing`
 before AND after so headings don't jam into the surrounding paragraphs
-(`Heading3+` inherit this via `basedOn Heading2`); and `AbstractTitle` is coloured
+(`Heading3+` inherit this via `basedOn Heading2`); `AbstractTitle` is coloured
 ORE blue so the "Abstract" heading — and the "Keywords" heading `postprocess.py`
-retypes to `AbstractTitle` — match the blue section headings. (`AbstractTitle` is
-add-enriched first, so it exists by the time the patch runs.) The patcher rewrites
+retypes to `AbstractTitle` — match the blue section headings; `BodyText` gets a
+real space-after (6 pt) so consecutive body paragraphs are visibly separated
+(the stock template's near-zero spacing makes paragraphs sit flush), while
+`Compact` — Pandoc's tight-list / table-cell paragraph style — is pinned to 0/0
+so lists and table cells stay tight. (`AbstractTitle` and `Compact` are
+add-enriched first, so they exist by the time the patch runs.) The patcher rewrites
 only the managed child elements, in OOXML schema order, and is idempotent. To
 change the title colour/alignment or the heading spacing, edit `STYLE_PATCHES`
 (values are twips; 1 pt = 20 twips) and rebuild the enriched reference.
