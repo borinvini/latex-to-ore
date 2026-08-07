@@ -26,6 +26,18 @@ Figure legends (at end) → Tables (with legends, AFTER references).
   review. The editorial office asks authors to CITE the preprint version of their
   own article in the manuscript. Add it to the references once the preprint DOI
   is known.
+- EXISTING PREPRINT (arXiv/bioRxiv/SSRN/Zenodo/institutional repository): if a
+  version of the work was already posted before submission, the editorial office
+  asks for it to be cited in the manuscript ("Please cite the pre-print version
+  of your article in your manuscript."). Cite it in the INTRODUCTION, with the
+  reference in the reference list, using this wording:
+  ```
+  A previous version of this work was made available as a preprint [CITATION].
+  The present article includes revisions made during the Open Research Europe
+  publication process.
+  ```
+  Always ask the author whether such a preprint exists; it cannot be inferred
+  from the manuscript.
 
 ## Declarations (all go at the END, before References)
 - Data Availability (MANDATORY, even if no data): title it "Data Availability".

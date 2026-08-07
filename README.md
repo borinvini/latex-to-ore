@@ -199,7 +199,8 @@ to the model's memory of what ORE wants:
 | **Keywords** — up to 8 | Pulled from `\IEEEkeywords` (or equivalent), trimmed to 8, given a proper ORE-styled heading |
 | **Plain Language Summary** — recommended | Offered and drafted on request; placed after the keywords |
 | **Main body** — standard IMRaD, ≤15,000 words | Section mapping confirmed with you; never silently renamed |
-| **Preprint self-citation** | Recorded as an explicit to-do on the checklist (the DOI does not exist until after submission) |
+| **Existing preprint** — a version already posted on arXiv/bioRxiv/SSRN/Zenodo must be cited | You are asked in Phase 2 whether one exists; if so, Phase 3 adds the reference and the required sentence ("A previous version of this work was made available as a preprint…") to the Introduction |
+| **Preprint self-citation** — the ORE preprint of the article itself | Recorded as an explicit to-do on the checklist (the DOI does not exist until after submission) |
 | **Data Availability** — mandatory even with no data | Written in ORE's exact required format: *Underlying data* + *Extended data* subsections, per-file descriptions, DOI, closing CC BY 4.0 / CC0 licence sentence |
 | **Open Data policy** — values behind means/SDs and every figure, points extracted from images, data dictionary; DOI required; no embargo, no login wall | Walked through in Phase 2; non-approved repositories (e.g. Kaggle) are flagged with a Zenodo/figshare/Dryad/OSF recommendation |
 | **Ethics and consent** — dedicated section immediately after Data Availability | Board name, approval number and consent type collected; otherwise the exact required "Ethical approval and consent were not required." |

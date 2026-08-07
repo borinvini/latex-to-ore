@@ -116,15 +116,27 @@ compliant. Gather (do not write into the `.tex` yet — that is Phase 3):
 6. **Section mapping** — confirm the body maps to Introduction / Methods /
    Results / Conclusions-Discussion. Don't silently rename the author's
    sections — ask before restructuring.
-7. **Preprint self-citation** — ORE publishes the article as a preprint before
-   review and asks authors to cite their own preprint. Record as a to-do (add
-   the preprint DOI once known; usually not possible until after submission).
+7. **Existing preprint — ASK EVERY TIME.** Ask the author outright: *"Do you
+   already have a preprint version of this work (for example an arXiv, bioRxiv,
+   SSRN, Zenodo, or institutional-repository posting)? ORE editors ask authors to
+   cite it in the manuscript."* Do not infer the answer from the `.tex` — ask,
+   even if a self-citation seems to be present already.
+   - **If yes** — collect the preprint DOI or URL, plus enough metadata for a
+     reference entry (authors, title, year, server/repository, arXiv ID if any).
+     Check whether the `.bib` already has an entry for it and reuse that key;
+     otherwise a new entry is added in Phase 3. Phase 3 then cites it in the
+     **Introduction**.
+   - **If no** — nothing to insert. Keep the standard to-do below.
+8. **ORE preprint self-citation (always a to-do)** — ORE also publishes the
+   article itself as a preprint before review and asks authors to cite that
+   version. Its DOI does not exist until after submission, so record it as a
+   checklist to-do regardless of the answer to item 7.
 
 Declarations to gather (Phase 3 writes them at the END, before `\bibliography`,
 in this order: Data Availability -> Ethics and consent -> Competing Interests ->
 Grant Information -> Acknowledgments):
 
-8. **Data Availability** — MANDATORY even with no new data. Follow the ORE Open
+9. **Data Availability** — MANDATORY even with no new data. Follow the ORE Open
    Data policy and exact format in `references/ore-guidelines.md`: an
    **Underlying data** subsection ("Repository name: [title]. https://doi.org/XXXX
    [Reference]." + a bulleted list of every deposited file with a description),
@@ -136,21 +148,21 @@ Grant Information -> Acknowledgments):
    (e.g. Kaggle) — ORE expects an approved repository (Zenodo/figshare/Dryad/OSF)
    with CC BY/CC0 and no login wall; recommend a Zenodo/figshare deposit and use
    that DOI. (See `data-package-structure.md` for the matching deposit.)
-9. **Ethics and consent** — dedicated section immediately AFTER Data
-   Availability. Human/animal subjects: give ethics-board name, approval number,
-   consent type. If not applicable: "Ethical approval and consent were not
-   required."
-10. **Competing Interests** — mandatory. Default "No competing interests were
-   disclosed" unless the author says otherwise (accepted variant: "Conflict of
-   interest").
-11. **Grant Information** — extract from `\thanks{...}`/acknowledgments; format
+10. **Ethics and consent** — dedicated section immediately AFTER Data
+    Availability. Human/animal subjects: give ethics-board name, approval number,
+    consent type. If not applicable: "Ethical approval and consent were not
+    required."
+11. **Competing Interests** — mandatory. Default "No competing interests were
+    disclosed" unless the author says otherwise (accepted variant: "Conflict of
+    interest").
+12. **Grant Information** — extract from `\thanks{...}`/acknowledgments; format
     as project ID + title + grantee for EVERY funder. Cross-check against the
     funders the author declares in the submission-system funding form (the
     editorial office flags any funder in the system but missing here). Ask the
     author to confirm the full funder list.
-12. **Author Contributions** — collect a CRediT-taxonomy summary, but note it is
+13. **Author Contributions** — collect a CRediT-taxonomy summary, but note it is
     entered in the ORE web form, NOT written into the manuscript.
-13. **Acknowledgments** — optional; no grant funding here (that belongs only in
+14. **Acknowledgments** — optional; no grant funding here (that belongs only in
     Grant Information).
 
 ## Phase 3 — Inject content into the LaTeX copy
@@ -217,7 +229,22 @@ truth.
    conversion copy only — so the same author-facing `.tex` yields BOTH a clean
    review PDF and a clean DOCX (names / affiliation / corresponding author on
    separate lines, before the abstract, no footnotes).
-5. **Move tables after the references** — ORE requires tables (with legends) in a
+5. **Preprint citation in the Introduction** — only if the author answered YES to
+   Phase 2 item 7. Add a `@misc`/`@article` entry for the preprint to the copied
+   `.bib` (skip if a usable entry already exists) with its DOI or URL, then add
+   this sentence as the LAST paragraph of the Introduction, citing that key:
+
+   ```latex
+   A previous version of this work was made available as a preprint~\cite{KEY}.
+   The present article includes revisions made during the Open Research Europe
+   publication process.
+   ```
+
+   Keep the wording; adapt only the key. It must land in the Introduction (the
+   `\section{Introduction}` body, or the paper's equivalent opening section as
+   mapped in Phase 2 item 6), not in the declarations. Do not add it if the author
+   said they have no preprint.
+6. **Move tables after the references** — ORE requires tables (with legends) in a
    dedicated section AFTER the references. Run the bundled script on the
    author-facing copy (it still has a real `\bibliography` line, so the copy
    keeps compiling):
@@ -235,8 +262,9 @@ truth.
 ## Phase 4 — Author review gate
 
 Tell the author the ORE content is now in `ore-submission/tex/main.tex`: the
-restructured abstract, the declaration sections, and the relocated Tables
-section. Invite them to review/edit it directly (and optionally compile it to a
+restructured abstract, the declaration sections, the preprint sentence in the
+Introduction (if they have a preprint), and the relocated Tables section. Invite
+them to review/edit it directly (and optionally compile it to a
 PDF to eyeball). **Pause for their confirmation** before converting. Anything
 they change in the `.tex` flows straight through the conversion.
 
@@ -325,7 +353,8 @@ few properties on styles the template already defines (or that the enrichment
 pass just added): the `Title` is made centered + ORE blue (`004494`, matching the
 section headings) with breathing room; `Heading1`/`Heading2` get real `spacing`
 before AND after so headings don't jam into the surrounding paragraphs
-(`Heading3+` inherit this via `basedOn Heading2`); `AbstractTitle` is coloured
+(`Heading3`/`Heading4` are patched separately — see "Heading hierarchy" below,
+and `Heading5+` inherit from `Heading4`); `AbstractTitle` is coloured
 ORE blue so the "Abstract" heading — and the "Keywords" heading `postprocess.py`
 retypes to `AbstractTitle` — match the blue section headings; `BodyText` gets a
 real space-after (6 pt) so consecutive body paragraphs are visibly separated
@@ -336,6 +365,30 @@ add-enriched first, so they exist by the time the patch runs.) The patcher rewri
 only the managed child elements, in OOXML schema order, and is idempotent. To
 change the title colour/alignment or the heading spacing, edit `STYLE_PATCHES`
 (values are twips; 1 pt = 20 twips) and rebuild the enriched reference.
+
+### Heading hierarchy
+
+The stock ORE template defines only TWO heading levels, so any paper with
+`\subsubsection` needs level 3 supplied by this skill. Previously `Heading3` was
+enriched as a bare `basedOn Heading2` with no overrides, which made a
+`\subsubsection` typographically IDENTICAL to a `\subsection` in the DOCX.
+`STYLE_PATCHES` now gives each level its own look, staying inside the ORE design
+language (Arial throughout, black below level 1, progressive left indent):
+
+| LaTeX | Style | Look |
+|---|---|---|
+| `\section` | `Heading1` | Arial bold, ORE blue `004494`, 10.5 pt (template) |
+| `\subsection` | `Heading2` | Arial bold, black, 9 pt, indent 100 (template) |
+| `\subsubsection` | `Heading3` | Arial **bold italic**, black, 9 pt, indent 220 |
+| `\paragraph` (+deeper) | `Heading4`+ | Arial *italic*, not bold, 9 pt, indent 340 |
+
+Bold → bold-italic → italic is the conventional academic step-down: each level
+reads as subordinate without adding a font or colour ORE does not use. The
+patcher supports `ind`, `bold`, and `italic` keys alongside `spacing`/`jc`/
+`color`; `bold: False` emits an explicit `w:val="0"` because merely omitting
+`<w:b/>` would NOT cancel the bold inherited through `basedOn`. If a future ORE
+template ships its own level-3 style, the enrichment pass leaves it alone (it
+never overwrites a style the template defines) — adjust `STYLE_PATCHES` to match.
 
 Separately, `patch_doc_defaults` lowers the document-default run size to the ORE
 body size (`DOC_DEFAULT_SZ`, 19 half-pt = 9.5 pt). Pandoc emits list-item
@@ -480,7 +533,9 @@ added later by `postprocess.py`, not here.
    offer to scaffold an empty deposit folder.
 7. Print a summary: package contents and remaining author to-dos — the
    equation-review flag (cases/matrix math may show as raw TeX), any figures
-   flagged for re-export, the preprint self-citation to add later, the funder
+   flagged for re-export, the ORE preprint self-citation to add later (and, if
+   the author has an existing preprint, confirmation that it is cited in the
+   Introduction with its final DOI), the funder
    cross-check, the data-deposit DOI, and any Phase 2 items left as "needs your
    input".
 

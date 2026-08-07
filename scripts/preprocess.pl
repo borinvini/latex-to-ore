@@ -103,6 +103,14 @@ my $nested = qr/(\{(?:[^{}]++|(?1))*\})/;
 # \rotatebox has an optional [..] then one brace arg (angle) before the content.
 1 while $tex =~ s/\\rotatebox\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}\s*$nested/ substr($1, 1, -1) /ge;
 
+# 9. Demote inline math that is nothing but a thousands-separated number to plain
+#    text: $5{,}915$ -> 5,915 and $245{,}000$ -> 245,000. IEEE authors write these
+#    in math mode so LaTeX kerns the separator, but Pandoc converts them to OMML
+#    and Word then typesets the comma as a math punctuation operator, inserting a
+#    space after it ("5, 915"). These are not equations, so unwrapping the $...$
+#    and dropping the {} braces yields a normally spaced number in the DOCX.
+$tex =~ s/\$(\d{1,3}(?:\{,\}\d{3})+)\$/ my $n = $1; $n =~ s|\{,\}|,|g; $n /ge;
+
 open(my $ofh, '>', $texfile) or die $!;
 print $ofh $tex;
 close $ofh;
