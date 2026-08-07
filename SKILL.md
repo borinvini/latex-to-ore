@@ -433,6 +433,15 @@ unstyled paragraphs (list items) are affected, and they now match the body.
     with `\rotatebox{90}{...}`; Pandoc does not look inside `\resizebox`, so the
     tabular becomes an unparsed argument and the whole table (caption included) is
     dropped. Removing the wrappers exposes the plain tabular for conversion.
+12. **Demotes thousands-separated inline math to plain text**: `$5{,}915$` ->
+    `5,915`, `$245{,}000$` -> `245,000`. IEEE authors write these in math mode so
+    LaTeX kerns the separator, but Pandoc converts them to OMML and Word then
+    typesets the comma as a math punctuation operator, inserting a space after it
+    ("5, 915"). They are not equations, so unwrapping the `$...$` and dropping the
+    `{}` braces yields a normally spaced number. The pattern is deliberately
+    narrow — 1 to 3 digits followed by one or more `{,}` + exactly-3-digit groups,
+    and nothing else between the `$` — so any inline math carrying real operators
+    or symbols is left alone.
 
 If a new paper uses other custom macros Pandoc chokes on, add a numbered step to
 `scripts/preprocess.pl` (regex strip or unwrap) rather than hand-editing the
